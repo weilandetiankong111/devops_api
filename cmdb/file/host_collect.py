@@ -26,10 +26,14 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 log_file = os.path.join(BASE_DIR, "collect.log")
 logging.basicConfig(level=logging.INFO,filename=log_file,format="%(asctime)s - [%(levelname)s] %(message)s")
 
+def get_ip_address(nic):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    socket.inet_ntoa(fcntl.ioctl(s.fileno(),0x8915,struct.pack('256s', nic[:15]))[20:24])
+
 class GetData():
     def __init__(self):
         self.result = {}
-    # 解析文件，为获取CPU和内存使用
+    # 解析文件
     def parse_file(self, file, name):
         with open(file) as f:
             for line in f.readlines():
@@ -68,7 +72,7 @@ class GetData():
             else:
                 os_version = f.readline().strip()
         return os_version
-    # 系统启动时间，先作为服务器上架时间
+    # 系统启动时间
     def system_up_time(self):
         with open("/proc/uptime") as f:
             s = f.read().split(".")[0] # 启动有多少秒
@@ -76,17 +80,18 @@ class GetData():
         return date.strftime(up_time, '%Y-%m-%d')
     def public_ip(self):
         private_ip = self.private_ip()
-        ip_api_url = ['http://ifconfig.me/ip','http://ip.renfei.net']
+        ip_api_url = ['http://ip.renfei.net', 'http://ifconfig.me/ip']
         ip_list = []
         try:
             req = request.Request(url=ip_api_url[0])
             res = request.urlopen(req)
-            ip = res.read().decode()
+            ip = json.loads(res.read().decode())['clientIP']
         except:
             req = request.Request(url=ip_api_url[1])
             res = request.urlopen(req)
-            ip = json.loads(res.read().decode())['clientIP']
+            ip = res.read().decode()
         if ip in private_ip:
+            ip.append(ip)
             return ip_list
         else:
             ip_list.append('%s(NAT)' %ip)
@@ -130,13 +135,13 @@ class GetData():
             "hostname": self.hostname(),
             "machine_type": self.machine_type(),
             "os_version": self.os_version(),
-            "public_ip": self.public_ip(),
+            # "public_ip": self.public_ip(),
             "private_ip": self.private_ip(),
             "cpu_num": self.cpu_num(),
             "cpu_model": self.cpu_model(),
             "memory": self.memory(),
             "disk": self.disk(),
-            "put_shelves_date": self.system_up_time(),
+            "put_shelves_date": self.system_up_time(),  # 上架时间默认设置系统启动时间
         }
         json_data = json.dumps(self.result)
         return json_data

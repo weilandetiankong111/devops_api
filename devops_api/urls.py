@@ -18,13 +18,14 @@ from django.urls import path, include, re_path
 from rest_framework import routers
 
 from libs.token_auth import CustomAuthToken, ChangeUserPasswordView
-from cmdb.views import HostCollectView
+from cmdb.views import HostCollectView, CreateHostView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path('^api/login/$',CustomAuthToken.as_view()),
     re_path('^api/change_password/$', ChangeUserPasswordView.as_view()),
     re_path('^api/cmdb/host_collect/$', HostCollectView.as_view()),
+    re_path('^api/cmdb/create_host/$', CreateHostView.as_view()),
 ]
 
 from cmdb.views import IdcViewSet,ServerViewSet,ServerGroupViewSet
