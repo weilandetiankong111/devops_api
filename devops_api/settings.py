@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'system_config',
     'django_filters',
     'rest_framework.authtoken',
+    'rest_framework_swagger'
 ]
 
 MIDDLEWARE = [
@@ -69,6 +70,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {  # Adding this section should work around the issue.
+                'staticfiles': 'django.templatetags.static',
+            },
         },
     },
 ]
@@ -149,8 +153,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'  # 登录后就能访问所有API
     ],
+    # API接口文档
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
 }
 
 DEFAULT_CHARSET = 'utf-8'
 
 CLIENT_COLLECT_DIR = "/opt/"
+

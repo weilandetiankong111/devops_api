@@ -18,14 +18,21 @@ from django.urls import path, include, re_path
 from rest_framework import routers
 
 from libs.token_auth import CustomAuthToken, ChangeUserPasswordView
-from cmdb.views import HostCollectView, CreateHostView
+from cmdb.views import HostCollectView, CreateHostView, ExcelCreateHostView, AliyunCloudView, TencentCloudView
+
+from rest_framework_swagger.views import get_swagger_view
+schema_view = get_swagger_view(title='接口文档')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    re_path(r'^api/docs/$',schema_view),
     re_path('^api/login/$',CustomAuthToken.as_view()),
     re_path('^api/change_password/$', ChangeUserPasswordView.as_view()),
     re_path('^api/cmdb/host_collect/$', HostCollectView.as_view()),
     re_path('^api/cmdb/create_host/$', CreateHostView.as_view()),
+    re_path('^api/cmdb/excel_create_host/$', ExcelCreateHostView.as_view()),
+    re_path('^api/cmdb/aliyun_cloud/$', AliyunCloudView.as_view()),
+    re_path('^api/cmdb/tencent_cloud/$', TencentCloudView.as_view()),
 ]
 
 from cmdb.views import IdcViewSet,ServerViewSet,ServerGroupViewSet
