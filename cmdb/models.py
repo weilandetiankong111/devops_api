@@ -35,8 +35,7 @@ class ServerGroup(models.Model):
 class Server(models.Model):
     idc = models.ForeignKey(Idc, on_delete=models.PROTECT, verbose_name="IDC机房")  # 一对多
     server_group = models.ManyToManyField(ServerGroup, default="Default", verbose_name="主机分组")  # 多对多
-    credential = models.ForeignKey(Credential, on_delete=models.PROTECT, blank=True, null=True,
-                                   verbose_name="凭据")  # 一对多
+    credential = models.ForeignKey(Credential, on_delete=models.PROTECT, blank=True, null=True,verbose_name="凭据")  # 一对多
 
     name = models.CharField(max_length=30, blank=True, verbose_name="名称")
     hostname = models.CharField(max_length=30, unique=True, verbose_name="主机名")
@@ -46,12 +45,12 @@ class Server(models.Model):
 
     machine_type = models.CharField(max_length=30, blank=True, choices=(('vm','虚拟机'),('cloud_vm','云主机'),('physical_machine','物理机')), verbose_name="机器类型")
     os_version = models.CharField(max_length=50, blank=True, null=True, verbose_name="系统版本")
-    public_ip = models.CharField(max_length=100, blank=True, null=True, verbose_name="公网IP")
-    private_ip = models.CharField(max_length=100, blank=True, null=True, verbose_name="内网IP")
+    public_ip = models.JSONField(blank=True, null=True, verbose_name="公网IP")
+    private_ip = models.JSONField(blank=True, null=True, verbose_name="内网IP")
     cpu_num = models.CharField(max_length=10, blank=True, null=True, verbose_name="CPU")
     cpu_model = models.CharField(max_length=100, blank=True, null=True, verbose_name="CPU型号")
     memory = models.CharField(max_length=30, blank=True, null=True, verbose_name="内存")
-    disk = models.CharField(max_length=200,blank=True, null=True, verbose_name="硬盘")
+    disk = models.JSONField(blank=True, null=True, verbose_name="硬盘")
     put_shelves_date = models.DateField(null=True, blank=True, verbose_name="上架日期")
     off_shelves_date = models.DateField(null=True, blank=True, verbose_name="下架日期")
     expire_datetime = models.DateTimeField(blank=True, null=True, verbose_name="租约过期时间")

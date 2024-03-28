@@ -17,34 +17,111 @@ from rest_framework.viewsets import ModelViewSet
 # 序列化
 from cmdb.models import Idc,ServerGroup,Server
 from cmdb.serializers import IdcSerializer,ServerGroupSerializer,ServerSerializer
-from rest_framework import filters
+from rest_framework import filters, viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 
 from libs.ssh import SSH
 from django.http import FileResponse
 
-
 # Create your views here.
 class IdcViewSet(ModelViewSet):
-    queryset = Idc.objects.all()
-    serializer_class = IdcSerializer
+    queryset = Idc.objects.all() # 指定操作的数据
+    serializer_class = IdcSerializer # 指定序列化器
     filter_backends = [filters.SearchFilter,filters.OrderingFilter,DjangoFilterBackend] # 指定过滤器
-    search_fields = ['name',]  # 指定可搜索字段
-    filterset_fields = ('city',)  # 指定过滤字段
+    search_fields = ('name',)  # 指定可搜索字段
+    filter_fields = ('city',)  # 指定过滤字段
 
-class ServerGroupViewSet(ModelViewSet):
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        res = {'code': 200, 'msg': '更新成功！'}
+        return Response(res)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            self.perform_destroy(instance)
+            res = {'code': 200, 'msg': '删除成功！'}
+            return Response(res)
+        except Exception as e:
+            # return Response(status=status.HTTP_204_NO_CONTENT)
+            res = {'code': 500, 'msg': '该IDC机房关联其他主机，请先删除关联的主机再操作！！'}
+            return Response(res)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        # headers = self.get_success_headers(serializer.data)
+        res = {'code': 200,'msg': '创建成功！'}
+        return Response(res)
+
+class ServerGroupViewSet(viewsets.ModelViewSet):
     queryset = ServerGroup.objects.all()
     serializer_class = ServerGroupSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]  # 指定过滤器
-    search_fields = ['name', ]  # 指定可搜索字段
-    filterset_fields = ('name',)  # 指定过滤字段
+    search_fields = ('name', )  # 指定可搜索字段
+    filter_fields = ('city',)  # 指定过滤字段
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        res = {'code': 200, 'msg': '更新成功！'}
+        return Response(res)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            self.perform_destroy(instance)
+            res = {'code': 200, 'msg': '删除成功！'}
+            return Response(res)
+        except Exception as e:
+            # return Response(status=status.HTTP_204_NO_CONTENT)
+            res = {'code': 500, 'msg': '该分组关联其他主机，请先删除关联的主机再操作！！'}
+            return Response(res)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        res = {'code': 200,'msg': '该分组创建成功！'}
+        return Response(res)
 
 class ServerViewSet(ModelViewSet):
     queryset = Server.objects.all()
     serializer_class = ServerSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]  # 指定过滤器
-    search_fields = ['name','hostname','public_ip','private_ip', ]  # 指定可搜索字段
-    filterset_fields = ('idc','server_group',)  # 指定过滤字段
+    search_fields = ('name','hostname','public_ip','private_ip',)  # 指定可搜索字段
+    filter_fields = ('idc','server_group',)  # 指定过滤字段
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        res = {'code': 200, 'msg': '更新成功！'}
+        return Response(res)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        res = {'code': 200, 'msg': '删除成功！'}
+        return Response(res)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        res = {'code': 200,'msg': '主机创建成功！'}
+        return Response(res)
 
 class HostCollectView(APIView):
     def get(self,request):

@@ -23,7 +23,8 @@ class ServerSerializer(serializers.ModelSerializer):
     """
     服务器序列化类
     """
-    # idc = IdcSerializer() # 一对多
+    idc = IdcSerializer(read_only=True) # 一对多
+    server_group = ServerGroupSerializer(many=True,read_only=True) # 多对多
     class Meta:
         model = Server
         fields = "__all__"
