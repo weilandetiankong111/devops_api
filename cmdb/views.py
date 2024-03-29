@@ -140,22 +140,23 @@ class ServerViewSet(ModelViewSet):
 class HostCollectView(APIView):
     def get(self,request):
         hostname = request.query_params.get('hostname')
-        # ssh_ip = request.data.get('ssh_ip')
-        # ssh_port = request.query_params['ssh_port']
-
         server = Server.objects.get(hostname=hostname)
         ssh_ip = server.ssh_ip
         ssh_port = server.ssh_port
+
         # credential_id = server.credential.id
 
         credential_id = request.query_params.get('credential_id')
-        if not server.credential and not credential_id:
-            result = {'code': 500, 'msg': '未发现凭据，请选择！'}
-            return Response(result)
+        # 选择凭据
+        if credential_id:
+            credential = int(credential_id)
+        # elif not server.credential and not credential_id:
+        #     result = {'code': 500, 'msg': '未发现凭据，请选择！'}
+        #     return Response(result)
         elif server.credential:
-            credential_id = int(server.credential.id)
-        elif credential_id:
-            credential_id = int(request.query_params.get('credential_id'))
+            credential_id = server.credential.id
+        # elif credential_id:
+        #     credential_id = int(request.query_params.get('credential_id'))
 
         # 通过凭据ID获取SSH用户名和密码
         credential = Credential.objects.get(id=credential_id)
@@ -167,9 +168,25 @@ class HostCollectView(APIView):
             private_key = credential.private_key  # key的内容，并不是一个文件
             ssh = SSH(ssh_ip, ssh_port, username, key=private_key)
 
-        result = ssh.command('ls -l /etc')
-        print(result)
-        return Response(result)
+            # 测试是否SSH连接成功
+            result = ssh.test()
+            if result['code'] == 200:
+                client_agent_name = "host_collect.py"
+                local_file = os.path.join(settings.BASE_DIR, 'cmdb', 'files', client_agent_name)
+                remote_file = os.path.join(settings.CLIENT_COLLECT_DIR, client_agent_name)
+                ssh.scp(local_file, remote_file)
+                result = ssh.command('python %s' % remote_file)
+                if result['code'] == 200:
+                    data = json.loads(result['data'])
+                    data['is_verified'] = 'verified'
+                    data['credential'] = credential_id
+                    Server.objects.filter(hostname=hostname).update(**data)
+                    res = {'code': 200, 'msg': '主机配置同步成功！'}
+                else:
+                    res = {'code': 500, 'msg': '主机配置同步失败！错误：%s' % result['msg']}
+            else:
+                res = {'code': 500, 'msg': '%s' % result['msg']}
+            return Response(res)
 
 class CreateHostView(APIView):
     def post(self,request):
