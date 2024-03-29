@@ -72,6 +72,20 @@ class ServerGroupViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+
+        hostname = request.data.get('hostname')
+
+        # 一对多
+        idc_id = int(request.data.get('idc'))
+        idc_obj = Idc.objects.get(id=idc_id)
+        server_obj = Server.objects.get(hostname=hostname)
+        server_obj.idc = idc_obj
+        server_obj.save()
+
+        # 多对多
+        group_id_list = request.data.get('server_group')
+        server_obj.server_group.add(*group_id_list)
+
         res = {'code': 200, 'msg': '更新成功！'}
         return Response(res)
 
@@ -159,7 +173,10 @@ class HostCollectView(APIView):
 
 class CreateHostView(APIView):
     def post(self,request):
-        idc_id = int(request.data.get('idc_id'))
+        idc_id = int(request.data.get('idc'))  # 机房id
+        print(request)
+        print(request.data)
+        print(idc_id)
         server_group_id_list = request.data.get('server_group')
         name = request.data.get('name')
         hostname = request.data.get('hostname')
