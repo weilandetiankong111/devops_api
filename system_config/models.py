@@ -22,3 +22,25 @@ class Credential(models.Model):
 
     def __str__(self):
         return self.name
+
+class Notify(models.Model):
+    notify_choice = (
+        (1, "邮件"),
+        (2, "钉钉"),
+        (3, "企业微信")
+    )
+    name = models.CharField(max_length=50, verbose_name="名称")
+    notify_mode = models.IntegerField(choices=notify_choice, default=1, verbose_name="通知方式")
+    email_recipient = models.CharField(max_length=200, null=True, blank=True, verbose_name="邮件收件人")
+    dingding_webhook = models.CharField(max_length=100, null=True, blank=True, verbose_name="钉钉Webhook")
+    weixin_webhook = models.CharField(max_length=100, null=True, blank=True, verbose_name="企业Webhook")
+    note = models.TextField(null=True, blank=True, verbose_name="备注")
+    create_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+
+    class Meta:
+        db_table = "system_config_notify"
+        verbose_name_plural = "通知管理"
+        ordering = ('-id',)
+
+    def __str__(self):
+        return self.name
