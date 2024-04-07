@@ -39,7 +39,7 @@ class TCloud():
             return {'code': '500', 'msg': e.message}
 
 if __name__ == '__main__':
-    cloud = TCloud("AKIDJaox2BMemv5A92hKm5EE8tUuHTfmnU6a", "XzJVZVIzYzHVboxyukV9f2IVbZROLBsT")
+    cloud = TCloud("", "")
     result = cloud.region_list()
     # result = cloud.zone_list('ap-shanghai')
     # result = cloud.instance_list("ap-shanghai")
