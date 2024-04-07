@@ -56,11 +56,11 @@ class AliCloud():
             return {'code': 500, 'msg': e.get_error_msg()}
 
 if __name__ == '__main__':
-    cloud = AliCloud('LTAI5tB7BPcN6Jqm8ipgKSb9', 'G3tVeC797sQQqBntMRJhKgaaAsmK4H')
+    cloud = AliCloud('', '')
     # result = cloud.region_list()
     # result = cloud.zone_list('cn-beijing')
     result = cloud.instance_list('cn-beijing')
-    # result = cloud.instance_disk('i-2zeffuf3e3uixm96jabc')
+    # result = cloud.instance_disk('')
     print(result)
 
 
