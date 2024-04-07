@@ -3,7 +3,7 @@ from django.urls import path, include, re_path
 
 from libs.token_auth import CustomAuthToken,ChangeUserPasswordView
 from cmdb.views import HostCollectView, CreateHostView, ExcelCreateHostView, AliyunCloudView, TencentCloudView
-from app_release.views import GitView
+from app_release.views import GitView, DeployView, RollbackView,ApplyEchartView
 
 from rest_framework_swagger.views import get_swagger_view
 schema_view = get_swagger_view(title='接口文档')
@@ -19,6 +19,9 @@ urlpatterns = [
     re_path('^api/cmdb/aliyun_cloud/$', AliyunCloudView.as_view()),
     re_path('^api/cmdb/tencent_cloud/$', TencentCloudView.as_view()),
     re_path('^api/app_release/git/$', GitView.as_view()),
+    re_path('^api/app_release/deploy/$', DeployView.as_view()),
+    re_path('^api/app_release/rollback/$', RollbackView.as_view()),
+    re_path('^api/app_release/apply_echart/$', ApplyEchartView.as_view()),
 ]
 
 # CMDB系统

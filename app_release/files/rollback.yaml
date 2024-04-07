@@ -1,0 +1,15 @@
+- name: 目标主机
+  hosts: webservers
+  gather_facts: no
+  tasks:
+  - name: 使用备份文件重新部署
+    shell: |
+      [ ! -d {{ history_version_dir }}/rollback ] && mkdir -p {{ history_version_dir }}/rollback
+      # 备份当前版本
+      mv {{ dst_dir }} {{ history_version_dir }}/rollback/
+      # 拷贝历史版本到工作目录
+      cp -rf {{history_version_dir}}/{{version_id}} {{ dst_dir }}
+  - name: 回滚后执行脚本-拷贝脚本
+    copy: src=/tmp/post_rollback_script.sh dest=/tmp/post_rollback_script.sh
+  - name: 回滚后执行脚本
+    shell: bash /tmp/post_rollback_script.sh

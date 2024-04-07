@@ -1,0 +1,42 @@
+- name: 本地执行
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: 检出前任务
+    shell: bash /tmp/pre_checkout_script.sh
+
+  - name: 执行检出
+    git: repo="{{git_repo}}" dest=/tmp/{{app_name}} version={{branch}}
+
+  - name: 检出后任务
+    shell: bash /tmp/post_checkout_script.sh
+
+- name: 目标主机
+  hosts: webservers
+  gather_facts: no
+  tasks:
+  - name: 代码备份
+    shell: |
+      if [ -d {{dst_dir}} ];then
+        if [ ! -d {{version_id}} ];then
+           mkdir -p {{history_version_dir}}/{{version_id}}
+        fi
+        cp -rf {{dst_dir}}/* {{history_version_dir}}/{{version_id}}/
+      fi
+
+  - name: 推送代码
+    synchronize: src=/tmp/{{app_name}}/ dest={{dst_dir}}  rsync_opts=--exclude=.git
+    when: source_file == "*"
+  - name: 推送代码
+    synchronize: src=/tmp/{{app_name}}/{{source_file}} dest={{dst_dir}}  rsync_opts=--delete,--exclude=.git
+    when: source_file != "*"
+
+  - name: 发布前任务-拷贝脚本
+    copy: src=/tmp/pre_deploy_script.sh dest=/tmp/pre_deploy_script.sh
+  - name: 发布前任务
+    shell: bash /tmp/pre_deploy_script.sh
+
+  - name: 发布后任务-拷贝脚本
+    copy: src=/tmp/post_deploy_script.sh dest=/tmp/post_deploy_script.sh
+  - name: 发布后任务
+    shell: bash /tmp/post_deploy_script.sh

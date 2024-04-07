@@ -32,8 +32,8 @@ class Notify(models.Model):
     name = models.CharField(max_length=50, verbose_name="名称")
     notify_mode = models.IntegerField(choices=notify_choice, default=1, verbose_name="通知方式")
     email_recipient = models.CharField(max_length=200, null=True, blank=True, verbose_name="邮件收件人")
-    dingding_webhook = models.CharField(max_length=100, null=True, blank=True, verbose_name="钉钉Webhook")
-    weixin_webhook = models.CharField(max_length=100, null=True, blank=True, verbose_name="企业Webhook")
+    dingding_webhook = models.CharField(max_length=200, null=True, blank=True, verbose_name="钉钉Webhook")
+    weixin_webhook = models.CharField(max_length=200, null=True, blank=True, verbose_name="企业Webhook")
     note = models.TextField(null=True, blank=True, verbose_name="备注")
     create_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
 
